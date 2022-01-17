@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import styles from './TodoItem.module.css';
 
 const TodoItem = (props) => {
-  const [editing, setediting] = useState(false);
+  const [editing, setEditing] = useState(false);
 
-  let viewMode = {};
-  let editMode = {};
+  const handleEditing = () => {
+    setEditing(true);
+  };
+
+  const handleUpdatedDone = (event) => {
+    if (event.key === 'Enter') {
+      setEditing(false);
+    }
+  };
 
   const completedStyle = {
     fontStyle: 'italic',
@@ -17,9 +23,8 @@ const TodoItem = (props) => {
 
   const { completed, id, title } = props.todo;
 
-  const handleEditing = () => {
-    setediting(true);
-  };
+  let viewMode = {};
+  let editMode = {};
 
   if (editing) {
     viewMode.display = 'none';
@@ -27,11 +32,11 @@ const TodoItem = (props) => {
     editMode.display = 'none';
   }
 
-  const handleUpdatedDone = (event) => {
-    if (event.key === 'Enter') {
-      setediting(false);
-    }
-  };
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up...');
+    };
+  }, []);
 
   return (
     <li className={styles.item}>
@@ -43,7 +48,7 @@ const TodoItem = (props) => {
           onChange={() => props.handleChangeProps(id)}
         />
         <button onClick={() => props.deleteTodoProps(id)}>Delete</button>
-        <span style={completed ? completedStyle : null}> {title}</span>
+        <span style={completed ? completedStyle : null}>{title}</span>
       </div>
       <input
         type="text"

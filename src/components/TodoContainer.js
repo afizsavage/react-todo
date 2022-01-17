@@ -1,20 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import Header from './Header';
 import InputTodo from './InputTodo';
 import TodoList from './TodosList';
-class TodoContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      todos: [],
-    };
-  }
+const TodoContainer = () => {
+  const [todos, setTodos] = useState([]);
 
-  handleChange = (id) => {
-    this.setState((prevState) => ({
-      todos: prevState.todos.map((todo) => {
+  const handleChange = (id) => {
+    setTodos((prevState) =>
+      prevState.map((todo) => {
         if (todo.id === id) {
           return {
             ...todo,
@@ -22,63 +17,57 @@ class TodoContainer extends React.Component {
           };
         }
         return todo;
+      })
+    );
+  };
+
+  const delTodo = (id) => {
+    setTodos([
+      ...todos.filter((todo) => {
+        return todo.id !== id;
       }),
-    }));
+    ]);
   };
 
-  delTodo = (id) => {
-    this.setState({
-      todos: [
-        ...this.state.todos.filter((todo) => {
-          return todo.id !== id;
-        }),
-      ],
-    });
+  const addTodoItem = (title) => {
+    const newTodo = {
+      id: uuidv4(),
+      title: title,
+      completed: false,
+    };
+    setTodos([...todos, newTodo]);
   };
 
-  addTodoItem = (title) => {
-    const newTodo = { id: uuidv4(), title: title, completed: false };
-    this.setState({ todos: [...this.state.todos, newTodo] });
-  };
-
-  setUpdate = (updatedTitle, id) => {
-    this.setState({
-      todos: this.state.todos.map((todo) => {
+  const setUpdate = (updatedTitle, id) => {
+    setTodos(
+      todos.map((todo) => {
         if (todo.id === id) {
           todo.title = updatedTitle;
         }
         return todo;
-      }),
-    });
+      })
+    );
   };
 
-  componentDidMount() {
+  useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/todos?_limit=10"')
       .then((response) => response.json())
-      .then((data) => this.setState({ todos: data }));
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.todos !== this.state.todos) {
-      // logic here
-    }
-  }
-
-  render() {
-    return (
-      <div className="container">
-        <div className="inner">
-          <Header />
-          <InputTodo addTodoProps={this.addTodoItem} />
-          <TodoList
-            todos={this.state.todos}
-            handleChangeProps={this.handleChange}
-            deleteTodoProps={this.delTodo}
-            setUpdate={this.setUpdate}
-          />
-        </div>
+      .then((data) => setTodos(data));
+  }, []);
+  return (
+    <div className="container">
+      <div className="inner">
+        <Header />
+        <InputTodo addTodoProps={addTodoItem} />
+        <TodoList
+          todos={todos}
+          handleChangeProps={handleChange}
+          deleteTodoProps={delTodo}
+          setUpdate={setUpdate}
+        />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
 export default TodoContainer;
